@@ -2,26 +2,7 @@ import tkinter as tk
 import tkinter.scrolledtext as scrolledtext
 import wikipediaapi as wiki
 import sys
-
-if sys.argv[0]:
-    pass
-
-root = tk.Tk()
-
-root.title("Content Generator")
-
-primary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20, pady=10)
-primary_key.insert(1.0, "puppy")
-primary_key.grid(row=0, column=0, pady=20)
-
-secondary_key = tk.Text(width=50, borderwidth = 5, height=1, padx=20, pady=10)
-secondary_key.insert(1.0, "dog")
-secondary_key.grid(row=1, column=0)
-
-output_box = tk.scrolledtext.ScrolledText(width=50, height=30, padx = 20, pady = 30, borderwidth=5)
-output_box.insert(1.0, "Output will appear here")  # The 1.0 refers to line 1, character 0
-output_box.grid(row=3, column=0, padx=20, pady=20)
-
+import pandas as pd
 
 def generate_output():
     primary_keyword = primary_key.get(1.0, tk.END)
@@ -29,10 +10,10 @@ def generate_output():
     if primary_keyword is None:
         pass
     else:
-        results = search_wikipedia(primary_keyword[:-1], secondary_keyword[:-1])
-        print(results)
+        results = search_wikipedia(primary_keyword[:-1].strip(), secondary_keyword[:-1].strip())
         output_box.delete(1.0, tk.END)
         output_box.insert(1.0, results)
+
 
 def search_wikipedia(primary_keyword, secondary_keyword=None):
     wiki_search = wiki.Wikipedia('en')
@@ -45,15 +26,49 @@ def search_wikipedia(primary_keyword, secondary_keyword=None):
 
             else:
                 return "Secondary Keyword Not Found"
-
     else:
         return results[0]
 
+def pd_generate_csv(output, primary_key, secondary_key):
+    data = {'input_keywords':[str(primary_key) + '; ' + str(secondary_key)],
+            'output_content' :[output]}
+    dataframe = pd.DataFrame(data)
+    dataframe.to_csv('output.csv', index=False)
 
-def generate_csv():
-    pass
 
-output_generation_btn = tk.Button(root, text="Generate Output", padx=40, pady=20, command=generate_output)
-output_generation_btn.grid(row=2, columnspan=2, pady=20)
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        df = pd.read_csv(sys.argv[1])
+        keywords = list(df['input_keywords'])[0].split(';')
+        output = search_wikipedia(keywords[0], keywords[1])
+        pd_generate_csv(output, keywords[0], keywords[1])
 
-root.mainloop()
+    else:
+        root = tk.Tk()
+
+        # Window Title
+        root.title("Content Generator")
+
+        # Primary Key Text Box
+        primary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20, pady=10)
+        primary_key.insert(1.0, "Primary Key")
+        primary_key.grid(row=0, column=0, pady=20)
+
+        # Secondary Key Text Box
+        secondary_key = tk.Text(width=50, borderwidth = 5, height=1, padx=20, pady=10)
+        secondary_key.insert(1.0, "Secondary Key")
+        secondary_key.grid(row=1, column=0)
+
+        # Output Text Box
+        output_box = tk.scrolledtext.ScrolledText(width=50, height=30, padx = 20, pady = 30, borderwidth=5)
+        output_box.insert(1.0, "Output will appear here after request")  # The 1.0 refers to line 1, character 0
+        output_box.grid(row=2, column=0, padx=20, pady=20)
+
+        # Output Generation Button
+        output_generation_btn = tk.Button(root, text="Generate Output", padx=40, pady=20, command=generate_output)
+        output_generation_btn.grid(row=3, columnspan=2, pady=20)
+
+        # CSV Generation Button
+        csv_generation_btn = tk.Button(root, text="Generate CSV", padx=40, pady=20, command=lambda: pd_generate_csv(search_wikipedia(primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]), primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]))
+        csv_generation_btn.grid(row=4, columnspan=2, pady=20)
+        root.mainloop()
