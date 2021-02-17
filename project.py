@@ -50,25 +50,34 @@ if __name__ == '__main__':
         root.title("Content Generator")
 
         # Primary Key Text Box
-        primary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20, pady=10)
+        primary_label = tk.Label(root, text='Primary Key')
+        primary_label.config(font=24)
+        primary_label.grid(row=0, column=0, pady=(10,0))
+        primary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20)
         primary_key.insert(1.0, "Primary Key")
-        primary_key.grid(row=0, column=0, pady=20)
+        primary_key.grid(row=1, column=0, pady=10)
 
         # Secondary Key Text Box
-        secondary_key = tk.Text(width=50, borderwidth = 5, height=1, padx=20, pady=10)
+        secondary_label = tk.Label(root, text='Secondary Key')
+        secondary_label.config(font=24)
+        secondary_label.grid(row=2, column=0, pady=(10, 0))
+        secondary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20, pady=5)
         secondary_key.insert(1.0, "Secondary Key")
-        secondary_key.grid(row=1, column=0)
+        secondary_key.grid(row=3, column=0)
 
         # Output Text Box
-        output_box = tk.scrolledtext.ScrolledText(width=50, height=30, padx = 20, pady = 30, borderwidth=5)
+        output_label = tk.Label(root, text='Output')
+        output_label.config(font=24)
+        output_label.grid(row=4, column=0, pady=(10, 0))
+        output_box = tk.scrolledtext.ScrolledText(width=50, height=30, padx=20, pady=15, borderwidth=5)
         output_box.insert(1.0, "Output will appear here after request")  # The 1.0 refers to line 1, character 0
-        output_box.grid(row=2, column=0, padx=20, pady=20)
+        output_box.grid(row=5, column=0, padx=20, pady=15)
 
         # Output Generation Button
-        output_generation_btn = tk.Button(root, text="Generate Output", padx=40, pady=20, command=generate_output)
-        output_generation_btn.grid(row=3, columnspan=2, pady=20)
+        output_generation_btn = tk.Button(root, text="Generate Output", padx=40, pady=15, command=generate_output)
+        output_generation_btn.grid(row=6, columnspan=2, pady=10)
 
         # CSV Generation Button
         csv_generation_btn = tk.Button(root, text="Generate CSV", padx=40, pady=20, command=lambda: pd_generate_csv(search_wikipedia(primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]), primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]))
-        csv_generation_btn.grid(row=4, columnspan=2, pady=20)
+        csv_generation_btn.grid(row=7, columnspan=2, pady=10)
         root.mainloop()
