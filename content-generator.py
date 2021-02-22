@@ -4,6 +4,7 @@ import wikipediaapi as wiki
 import sys
 import pandas as pd
 
+
 def generate_output():
     primary_keyword = primary_key.get(1.0, tk.END)
     secondary_keyword = secondary_key.get(1.0, tk.END)
@@ -18,14 +19,13 @@ def generate_output():
 def search_wikipedia(primary_keyword, secondary_keyword=None):
     wiki_search = wiki.Wikipedia('en')
     results = wiki_search.page(primary_keyword).text.splitlines()
-    if secondary_keyword:
+    if secondary_keyword and secondary_keyword != "Secondary-Key":
         for result in results:
             index = result.find(secondary_keyword)
             if index != -1:
                 return result
 
-            else:
-                return "Secondary Keyword Not Found"
+        return 'Secondary Keyword Not Found'
     else:
         return results[0]
 
@@ -50,19 +50,19 @@ if __name__ == '__main__':
         root.title("Content Generator")
 
         # Primary Key Text Box
-        primary_label = tk.Label(root, text='Primary Key')
+        primary_label = tk.Label(root, text='Primary-Key')
         primary_label.config(font=24)
         primary_label.grid(row=0, column=0, pady=(10,0))
         primary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20)
-        primary_key.insert(1.0, "Primary Key")
+        primary_key.insert(1.0, "Primary-Key")
         primary_key.grid(row=1, column=0, pady=10)
 
         # Secondary Key Text Box
-        secondary_label = tk.Label(root, text='Secondary Key')
+        secondary_label = tk.Label(root, text='Secondary-Key')
         secondary_label.config(font=24)
         secondary_label.grid(row=2, column=0, pady=(10, 0))
         secondary_key = tk.Text(width=50, borderwidth=5, height=1, padx=20, pady=5)
-        secondary_key.insert(1.0, "Secondary Key")
+        secondary_key.insert(1.0, "Secondary-Key")
         secondary_key.grid(row=3, column=0)
 
         # Output Text Box
