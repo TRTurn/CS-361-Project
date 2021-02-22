@@ -4,6 +4,7 @@ import wikipediaapi as wiki
 import sys
 import pandas as pd
 
+
 def generate_output():
     primary_keyword = primary_key.get(1.0, tk.END)
     secondary_keyword = secondary_key.get(1.0, tk.END)
