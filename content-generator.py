@@ -3,47 +3,79 @@ import tkinter.scrolledtext as scrolledtext
 import wikipediaapi as wiki
 import sys
 import pandas as pd
-
+import os
+from os import path
 
 def generate_output():
+    """Retrieves input values and displays data corresponding to the values passed."""
     primary_keyword = primary_key.get(1.0, tk.END)
     secondary_keyword = secondary_key.get(1.0, tk.END)
-    if primary_keyword is None:
-        pass
+    if primary_keyword is None or primary_keyword == 'Primary-Key':
+        display_output('Please Enter Key')
     else:
         results = search_wikipedia(primary_keyword[:-1].strip(), secondary_keyword[:-1].strip())
-        output_box.delete(1.0, tk.END)
-        output_box.insert(1.0, results)
+        display_output(results)
 
-
+        
+def display_output(data):
+    """Displays data on the Output Box within the GUI"""
+    output_box.delete(1.0, tk.END)
+    output_box.insert(1.0, data)
+    
 def search_wikipedia(primary_keyword, secondary_keyword=None):
+    """Searches wikipedia for a page corresponding with the primary keyword.
+    The secondary keyword is then used to find a paragraph containing both keywords"""
     wiki_search = wiki.Wikipedia('en')
     results = wiki_search.page(primary_keyword).text.splitlines()
-    if secondary_keyword and secondary_keyword != "Secondary-Key":
-        for result in results:
-            index = result.find(secondary_keyword)
-            if index != -1:
-                return result
 
+    if secondary_keyword and secondary_keyword != "Secondary-Key":
+        for paragraph in results:
+            index = paragraph.find(secondary_keyword)
+            if index != -1:
+                return paragraph
         return 'Secondary Keyword Not Found'
+
     else:
         return results[0]
 
-def pd_generate_csv(output, primary_key, secondary_key):
+def generate_csv(output, primary_key, secondary_key):
+    """Generates a CSV containing the passed keywords and their results"""
+    if secondary_key == 'Secondary-Key':
+        secondary_key = None
     data = {'input_keywords':[str(primary_key) + '; ' + str(secondary_key)],
             'output_content' :[output]}
     dataframe = pd.DataFrame(data)
     dataframe.to_csv('output.csv', index=False)
 
 
+def use_person_generator():
+    if path.exists('pg-generator.csv'):
+        os.system("python person-generator.py pg-generator.csv")
+
+        person_generator_output = pd.read_csv('pg_output.csv')
+        state_key = person_generator_output['input_state'].iloc[0]
+        results = search_wikipedia(state_key, 'temperature')
+        display_output(results)
+        primary_key.delete(1.0, tk.END)
+        primary_key.insert(1.0, state_key)
+        secondary_key.delete(1.0, tk.END)
+        secondary_key.insert(1.0, 'Temperature')
+
+    else:
+        display_output('No person generator file')
+        
+    
 if __name__ == '__main__':
+    # If a csv is passed with the command line generate CSV directly
     if len(sys.argv) > 1:
         df = pd.read_csv(sys.argv[1])
         keywords = list(df['input_keywords'])[0].split(';')
         output = search_wikipedia(keywords[0], keywords[1])
-        pd_generate_csv(output, keywords[0], keywords[1])
+        generate_csv(output, keywords[0], keywords[1])
 
-    else:
+    else:  # Create GUI
+
+        # Working with other generator
         root = tk.Tk()
 
         # Window Title
@@ -70,7 +102,7 @@ if __name__ == '__main__':
         output_label.config(font=24)
         output_label.grid(row=4, column=0, pady=(10, 0))
         output_box = tk.scrolledtext.ScrolledText(width=50, height=30, padx=20, pady=15, borderwidth=5)
-        output_box.insert(1.0, "Output will appear here after request")  # The 1.0 refers to line 1, character 0
+        output_box.insert(1.0, "Output will appear here after request")
         output_box.grid(row=5, column=0, padx=20, pady=15)
 
         # Output Generation Button
@@ -78,6 +110,12 @@ if __name__ == '__main__':
         output_generation_btn.grid(row=6, columnspan=2, pady=10)
 
         # CSV Generation Button
-        csv_generation_btn = tk.Button(root, text="Generate CSV", padx=40, pady=20, command=lambda: pd_generate_csv(search_wikipedia(primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]), primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]))
+        csv_generation_btn = tk.Button(root, text="Generate CSV", padx=40, pady=20, command=lambda: generate_csv(search_wikipedia(primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]), primary_key.get(1.0, tk.END)[:-1], secondary_key.get(1.0, tk.END)[:-1]))
         csv_generation_btn.grid(row=7, columnspan=2, pady=10)
+
+
+        # Person_Generation Button
+        person_generation_btn = tk.Button(root, text="Use Person Generation Input", padx=40, pady= 15, command=use_person_generator)
+        person_generation_btn.grid(row=8, columnspan=2, pady=10)
+
         root.mainloop()
