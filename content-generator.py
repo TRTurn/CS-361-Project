@@ -49,8 +49,8 @@ def generate_csv(output, primary_key, secondary_key):
 
 
 def use_person_generator():
-    if path.exists('pg-generator.csv'):
-        os.system("python person-generator.py pg-generator.csv")
+    if path.exists('pg-input.csv'):
+        os.system("python person-generator.py pg-input.csv")
 
         person_generator_output = pd.read_csv('pg_output.csv')
         state_key = person_generator_output['input_state'].iloc[0]
