@@ -119,3 +119,4 @@ if __name__ == '__main__':
         person_generation_btn.grid(row=8, columnspan=2, pady=10)
 
         root.mainloop()
+
